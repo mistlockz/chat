@@ -22,16 +22,25 @@ wss.on('connection', (ws) => {
 		if(event.type == 'connection'){
 			console.log(event.name + ' connected');	
 			event.socketInfo = ws;
-			clients.push(event);			
+			clients.push(event);
+			var pong = {};
+			pong.name = event.name;
+			pong.type = event.type;
+			pong.socketLength = clients.length;		
 			clients.forEach((client) => {
-				client.socketInfo.send("<strong>" + event.name + "</strong> has joined the chat");
+				client.socketInfo.send(JSON.stringify(pong));
 			});					
 		}
 
 		if(event.type == 'message'){
 			console.log(event.name + ' says: '+ event.content);
+			var pong = {};
+			pong.name = event.name;
+			pong.type = event.type;
+			pong.socketLength = clients.length;
+			pong.content= event.content;
 			clients.forEach((client) => {
-				client.socketInfo.send("<strong>" + event.name + " says:</strong> " + event.content);
+				client.socketInfo.send(JSON.stringify(pong));
 			});
 		}		
  	});
@@ -41,8 +50,12 @@ wss.on('connection', (ws) => {
 		var temp = clients[pos];
 		clients.splice(pos,1);		
 		if(clients.length>0){
+			var pong = {};
+			pong.name = temp.name;
+			pong.type = 'disconnect';
+			pong.socketLength = clients.length;
 			clients.forEach((client)=>{
-				client.socketInfo.send("<strong>" + temp.name + '</strong> has left the chat');
+				client.socketInfo.send(JSON.stringify(pong));
 			})
 		}
 
